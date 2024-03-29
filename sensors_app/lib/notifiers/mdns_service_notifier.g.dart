@@ -6,11 +6,11 @@ part of 'mdns_service_notifier.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$mdnsServiceHash() => r'e28e08cf9f51ef2392ea57604087200eef4bc4c5';
+String _$mdnsServiceHash() => r'a3919d167e16f9d30c9c44ee3ffe77c3d144a708';
 
 /// See also [mdnsService].
 @ProviderFor(mdnsService)
-final mdnsServiceProvider = FutureProvider<Registration>.internal(
+final mdnsServiceProvider = FutureProvider<nsd.Registration>.internal(
   mdnsService,
   name: r'mdnsServiceProvider',
   debugGetCreateSourceHash:
@@ -19,6 +19,6 @@ final mdnsServiceProvider = FutureProvider<Registration>.internal(
   allTransitiveDependencies: null,
 );
 
-typedef MdnsServiceRef = FutureProviderRef<Registration>;
+typedef MdnsServiceRef = FutureProviderRef<nsd.Registration>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

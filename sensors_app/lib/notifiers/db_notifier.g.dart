@@ -6,7 +6,7 @@ part of 'db_notifier.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$dBNotifierHash() => r'c30ef2617162778513015d5b62bb191746928ef4';
+String _$dBNotifierHash() => r'ab4d573fe6fdec04dfbe6e0e88b6b6ab1ea4ff6b';
 
 /// See also [DBNotifier].
 @ProviderFor(DBNotifier)

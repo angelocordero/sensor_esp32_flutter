@@ -23,7 +23,7 @@ class DBNotifier extends _$DBNotifier {
   void addSensor(String id) async {
     if (db == null) return;
 
-    SensorData data = SensorData(id: id);
+    SensorData data = SensorData(id: id, name: id);
 
     db!.writeAsync((isar) {
       isar.sensorDatas.put(data);
@@ -40,6 +40,16 @@ class DBNotifier extends _$DBNotifier {
     });
 
     ref.invalidateSelf();
+  }
+
+  void renameSensor(String id, String newName) {
+    if (db == null) return;
+
+    SensorData data = SensorData(id: id, name: newName);
+
+    db!.writeAsync((isar) {
+      isar.sensorDatas.put(data);
+    });
   }
 
   void setSensorStatusConnected(String id) {

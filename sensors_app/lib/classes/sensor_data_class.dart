@@ -8,12 +8,14 @@ part 'sensor_data_class.g.dart';
 class SensorData {
   String id;
 
+  String name;
+
   @ignore
   DateTime? lastTransmitTime;
   @ignore
   SensorStatus status = SensorStatus.Disconnected;
 
-  SensorData({required this.id, this.status = SensorStatus.Disconnected});
+  SensorData({required this.id, required this.name, this.status = SensorStatus.Disconnected});
 
   void setStatusActive() {
     lastTransmitTime = DateTime.now();

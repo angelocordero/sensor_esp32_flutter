@@ -3,8 +3,9 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sensors_app/classes/sensor_data_class.dart';
 import 'package:sensors_app/notifiers/db_notifier.dart';
-import 'package:sensors_app/notifiers/mdns_service_notifier.dart';
-import 'package:sensors_app/notifiers/udp_socket_notifier.dart';
+
+import 'mdns_service_notifier.dart';
+import 'udp_socket_notifier.dart';
 
 part 'sensors_data_notifier.g.dart';
 
