@@ -32,10 +32,4 @@ class SensorsData extends _$SensorsData {
 
     return data;
   }
-
-  refresh() async {
-    state = const AsyncLoading();
-    await Future.delayed(const Duration(seconds: 1));
-    ref.invalidateSelf();
-  }
 }

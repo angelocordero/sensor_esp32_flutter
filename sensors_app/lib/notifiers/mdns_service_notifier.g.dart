@@ -6,7 +6,7 @@ part of 'mdns_service_notifier.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$mdnsServiceHash() => r'a3919d167e16f9d30c9c44ee3ffe77c3d144a708';
+String _$mdnsServiceHash() => r'1973f184e27e01e73f762f38e0ee2e9b4312703f';
 
 /// See also [mdnsService].
 @ProviderFor(mdnsService)

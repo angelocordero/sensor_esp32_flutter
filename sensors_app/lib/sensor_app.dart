@@ -1,5 +1,8 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sensors_app/notifiers/alarm_notifier.dart';
+import 'package:sensors_app/notifiers/db_notifier.dart';
 import 'package:sensors_app/notifiers/sensors_data_notifier.dart';
 import 'package:sensors_app/widgets/sensor_list_tile.dart';
 
@@ -22,36 +25,117 @@ class SensorApp extends ConsumerWidget {
           title: const Text('Sensor App'),
           actions: [
             IconButton(
-              onPressed: () async {
-                await ref.read(sensorsDataProvider.notifier).refresh();
+              onPressed: () {
+                ref.read(dBNotifierProvider.notifier).refresh();
               },
               icon: const Icon(Icons.refresh),
             ),
+            IconButton(
+              onPressed: () async {
+                String? id = ref.read(sensorsDataProvider).value?.first.id;
+                if (id == null) return;
+                ref.read(dBNotifierProvider.notifier).setSensorStatusActive(id);
+              },
+              icon: const Icon(Icons.add),
+            ),
           ],
         ),
-        body: ref.watch(sensorsDataProvider).when(
-              data: (datas) {
-                return ListView.builder(
-                  itemCount: datas.length,
-                  itemBuilder: (context, index) {
-                    SensorData data = datas[index];
+        body: const SensorDataList(),
+      ),
+    );
+  }
+}
 
-                    return SensorListTile(
-                      data: data,
+class SensorDataList extends ConsumerStatefulWidget {
+  const SensorDataList({super.key});
+
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() => _SensorDataListState();
+}
+
+class _SensorDataListState extends ConsumerState<SensorDataList> {
+  late final AudioPlayer player;
+  @override
+  void initState() {
+    super.initState();
+    player = AudioPlayer();
+    player.setReleaseMode(ReleaseMode.loop);
+  }
+
+  @override
+  void dispose() {
+    player.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ref.watch(sensorsDataProvider).when(
+          skipLoadingOnRefresh: true,
+          skipLoadingOnReload: false,
+          data: (datas) {
+            ref.listen<bool>(alarmNotifierProvider, (prev, next) {
+              if (next == true) {
+                showDialog(
+                  barrierDismissible: false,
+                  context: context,
+                  builder: (context) {
+                    return Consumer(
+                      builder: (context, ref, child) {
+                        player.seek(Duration.zero);
+                        player.play(AssetSource('alarm.mp3'));
+                        ref.listen<bool>(alarmNotifierProvider, (prev, next) {
+                          if (next == false) {
+                            player.stop();
+                            Navigator.pop(context);
+                          }
+                        });
+                        return child!;
+                      },
+                      child: AlertDialog(
+                        backgroundColor: const Color(0xffc72c41),
+                        icon: const Icon(Icons.warning_amber),
+                        title: const Text('SMOKE DETECTED'),
+                        actions: [
+                          TextButton(
+                            style: ButtonStyle(
+                              visualDensity: VisualDensity.compact,
+                              foregroundColor: WidgetStateProperty.all(
+                                Colors.white,
+                              ),
+                            ),
+                            onPressed: () {
+                              ref.read(alarmNotifierProvider.notifier).dismiss();
+                            },
+                            child: const Text('Dismiss'),
+                          ),
+                        ],
+                      ),
                     );
                   },
                 );
+              }
+            });
+
+            return ListView.builder(
+              itemCount: datas.length,
+              itemBuilder: (context, index) {
+                SensorData data = datas[index];
+
+                return SensorListTile(
+                  data: data,
+                );
               },
-              error: (e, st) => Center(
-                child: Text(
-                  e.toString(),
-                ),
-              ),
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
+            );
+          },
+          error: (e, st) => Center(
+            child: Text(
+              e.toString(),
             ),
-      ),
-    );
+          ),
+          loading: () => const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
   }
 }

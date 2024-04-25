@@ -10,8 +10,6 @@ FutureOr<nsd.Registration> mdnsService(mdnsServiceRefref) async {
 
     nsd.Registration registration = await nsd.register(service);
 
-    print('registration successful');
-
     return registration;
   } catch (e) {
     throw Exception('Error in registering mDNS Service');

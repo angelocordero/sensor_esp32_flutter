@@ -50,7 +50,15 @@ class PopupMenu extends ConsumerWidget {
     return PopupMenuButton(
       icon: const Icon(Icons.more_vert),
       itemBuilder: (context) {
-        return [
+        return <PopupMenuEntry>[
+          PopupMenuItem(
+            enabled: false,
+            labelTextStyle: WidgetStateProperty.all(const TextStyle(color: Colors.white)),
+            child: Text(
+              'Activations: ${data.activations}',
+            ),
+          ),
+          const PopupMenuDivider(),
           PopupMenuItem(
             child: const Text('Rename'),
             onTap: () {
@@ -73,8 +81,15 @@ class PopupMenu extends ConsumerWidget {
                         child: const Text('Cancel'),
                       ),
                       TextButton(
-                        onPressed: () {
-                          ref.read(dBNotifierProvider.notifier).renameSensor(data.id, controller.text.trim());
+                        onPressed: () async {
+                          try {
+                            await ref.read(dBNotifierProvider.notifier).renameSensor(data.id, controller.text.trim());
+
+                            if (!context.mounted) return;
+                            Navigator.pop(context);
+                          } catch (e) {
+                            //
+                          }
                         },
                         child: const Text('Confirm'),
                       ),

@@ -6,7 +6,7 @@ part of 'sensors_data_notifier.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$sensorsDataHash() => r'9913e9a6140cc2acc9528feb3f618c554cb210dc';
+String _$sensorsDataHash() => r'c225803c70b8111654adb15d1b01958bcdfe7a70';
 
 /// See also [SensorsData].
 @ProviderFor(SensorsData)

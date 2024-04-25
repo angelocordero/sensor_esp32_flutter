@@ -28,6 +28,10 @@ const SensorDataSchema = IsarGeneratedSchema(
         name: 'name',
         type: IsarType.string,
       ),
+      IsarPropertySchema(
+        name: 'activations',
+        type: IsarType.long,
+      ),
     ],
     indexes: [],
   ),
@@ -43,6 +47,7 @@ const SensorDataSchema = IsarGeneratedSchema(
 int serializeSensorData(IsarWriter writer, SensorData object) {
   IsarCore.writeString(writer, 1, object.id);
   IsarCore.writeString(writer, 2, object.name);
+  IsarCore.writeLong(writer, 3, object.activations);
   return Isar.fastHash(object.id);
 }
 
@@ -52,9 +57,19 @@ SensorData deserializeSensorData(IsarReader reader) {
   _id = IsarCore.readString(reader, 1) ?? '';
   final String _name;
   _name = IsarCore.readString(reader, 2) ?? '';
+  final int _activations;
+  {
+    final value = IsarCore.readLong(reader, 3);
+    if (value == -9223372036854775808) {
+      _activations = 0;
+    } else {
+      _activations = value;
+    }
+  }
   final object = SensorData(
     id: _id,
     name: _name,
+    activations: _activations,
   );
   return object;
 }
@@ -66,6 +81,15 @@ dynamic deserializeSensorDataProp(IsarReader reader, int property) {
       return IsarCore.readString(reader, 1) ?? '';
     case 2:
       return IsarCore.readString(reader, 2) ?? '';
+    case 3:
+      {
+        final value = IsarCore.readLong(reader, 3);
+        if (value == -9223372036854775808) {
+          return 0;
+        } else {
+          return value;
+        }
+      }
     default:
       throw ArgumentError('Unknown property: $property');
   }
@@ -75,6 +99,7 @@ sealed class _SensorDataUpdate {
   bool call({
     required String id,
     String? name,
+    int? activations,
   });
 }
 
@@ -87,11 +112,13 @@ class _SensorDataUpdateImpl implements _SensorDataUpdate {
   bool call({
     required String id,
     Object? name = ignore,
+    Object? activations = ignore,
   }) {
     return collection.updateProperties([
           id
         ], {
           if (name != ignore) 2: name as String?,
+          if (activations != ignore) 3: activations as int?,
         }) >
         0;
   }
@@ -101,6 +128,7 @@ sealed class _SensorDataUpdateAll {
   int call({
     required List<String> id,
     String? name,
+    int? activations,
   });
 }
 
@@ -113,9 +141,11 @@ class _SensorDataUpdateAllImpl implements _SensorDataUpdateAll {
   int call({
     required List<String> id,
     Object? name = ignore,
+    Object? activations = ignore,
   }) {
     return collection.updateProperties(id, {
       if (name != ignore) 2: name as String?,
+      if (activations != ignore) 3: activations as int?,
     });
   }
 }
@@ -129,6 +159,7 @@ extension SensorDataUpdate on IsarCollection<String, SensorData> {
 sealed class _SensorDataQueryUpdate {
   int call({
     String? name,
+    int? activations,
   });
 }
 
@@ -141,9 +172,11 @@ class _SensorDataQueryUpdateImpl implements _SensorDataQueryUpdate {
   @override
   int call({
     Object? name = ignore,
+    Object? activations = ignore,
   }) {
     return query.updateProperties(limit: limit, {
       if (name != ignore) 2: name as String?,
+      if (activations != ignore) 3: activations as int?,
     });
   }
 }
@@ -164,11 +197,13 @@ class _SensorDataQueryBuilderUpdateImpl implements _SensorDataQueryUpdate {
   @override
   int call({
     Object? name = ignore,
+    Object? activations = ignore,
   }) {
     final q = query.build();
     try {
       return q.updateProperties(limit: limit, {
         if (name != ignore) 2: name as String?,
+        if (activations != ignore) 3: activations as int?,
       });
     } finally {
       q.close();
@@ -534,6 +569,92 @@ extension SensorDataQueryFilter
       );
     });
   }
+
+  QueryBuilder<SensorData, SensorData, QAfterFilterCondition>
+      activationsEqualTo(
+    int value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        EqualCondition(
+          property: 3,
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SensorData, SensorData, QAfterFilterCondition>
+      activationsGreaterThan(
+    int value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterCondition(
+          property: 3,
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SensorData, SensorData, QAfterFilterCondition>
+      activationsGreaterThanOrEqualTo(
+    int value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        GreaterOrEqualCondition(
+          property: 3,
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SensorData, SensorData, QAfterFilterCondition>
+      activationsLessThan(
+    int value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessCondition(
+          property: 3,
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SensorData, SensorData, QAfterFilterCondition>
+      activationsLessThanOrEqualTo(
+    int value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        LessOrEqualCondition(
+          property: 3,
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SensorData, SensorData, QAfterFilterCondition>
+      activationsBetween(
+    int lower,
+    int upper,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        BetweenCondition(
+          property: 3,
+          lower: lower,
+          upper: upper,
+        ),
+      );
+    });
+  }
 }
 
 extension SensorDataQueryObject
@@ -582,6 +703,18 @@ extension SensorDataQuerySortBy
       );
     });
   }
+
+  QueryBuilder<SensorData, SensorData, QAfterSortBy> sortByActivations() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(3);
+    });
+  }
+
+  QueryBuilder<SensorData, SensorData, QAfterSortBy> sortByActivationsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(3, sort: Sort.desc);
+    });
+  }
 }
 
 extension SensorDataQuerySortThenBy
@@ -613,6 +746,18 @@ extension SensorDataQuerySortThenBy
       return query.addSortBy(2, sort: Sort.desc, caseSensitive: caseSensitive);
     });
   }
+
+  QueryBuilder<SensorData, SensorData, QAfterSortBy> thenByActivations() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(3);
+    });
+  }
+
+  QueryBuilder<SensorData, SensorData, QAfterSortBy> thenByActivationsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(3, sort: Sort.desc);
+    });
+  }
 }
 
 extension SensorDataQueryWhereDistinct
@@ -621,6 +766,12 @@ extension SensorDataQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(2, caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<SensorData, SensorData, QAfterDistinct> distinctByActivations() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(3);
     });
   }
 }
@@ -638,6 +789,12 @@ extension SensorDataQueryProperty1
       return query.addProperty(2);
     });
   }
+
+  QueryBuilder<SensorData, int, QAfterProperty> activationsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(3);
+    });
+  }
 }
 
 extension SensorDataQueryProperty2<R>
@@ -653,6 +810,12 @@ extension SensorDataQueryProperty2<R>
       return query.addProperty(2);
     });
   }
+
+  QueryBuilder<SensorData, (R, int), QAfterProperty> activationsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(3);
+    });
+  }
 }
 
 extension SensorDataQueryProperty3<R1, R2>
@@ -666,6 +829,12 @@ extension SensorDataQueryProperty3<R1, R2>
   QueryBuilder<SensorData, (R1, R2, String), QOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addProperty(2);
+    });
+  }
+
+  QueryBuilder<SensorData, (R1, R2, int), QOperations> activationsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addProperty(3);
     });
   }
 }

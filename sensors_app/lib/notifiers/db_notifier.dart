@@ -42,14 +42,20 @@ class DBNotifier extends _$DBNotifier {
     ref.invalidateSelf();
   }
 
-  void renameSensor(String id, String newName) {
-    if (db == null) return;
+  Future<void> renameSensor(String id, String newName) async {
+    if (db == null) throw Exception('Null DB');
 
-    SensorData data = SensorData(id: id, name: newName);
+    try {
+      await db!.writeAsync((isar) {
+        final SensorData data = SensorData(id: id, name: newName);
+        isar.sensorDatas.put(data);
+      });
 
-    db!.writeAsync((isar) {
-      isar.sensorDatas.put(data);
-    });
+      // await refresh();
+      ref.invalidateSelf();
+    } catch (e) {
+      throw Exception();
+    }
   }
 
   void setSensorStatusConnected(String id) {
@@ -57,6 +63,24 @@ class DBNotifier extends _$DBNotifier {
   }
 
   void setSensorStatusActive(String id) {
-    state.value!.firstWhere((element) => element.id == id).setStatusActive();
+    if (db == null) throw Exception('Null DB');
+
+    try {
+      db!.write((isar) {
+        SensorData data = isar.sensorDatas.where().idEqualTo(id).findFirst()!;
+
+        SensorData newData = data.copyWith(activations: data.activations + 1);
+
+        isar.sensorDatas.put(newData);
+      });
+
+      state.value!.firstWhere((element) => element.id == id).setStatusActive();
+    } catch (e) {
+      throw Exception();
+    }
+  }
+
+  refresh() {
+    ref.invalidateSelf();
   }
 }
