@@ -30,14 +30,14 @@ class SensorApp extends ConsumerWidget {
               },
               icon: const Icon(Icons.refresh),
             ),
-            IconButton(
-              onPressed: () async {
-                String? id = ref.read(sensorsDataProvider).value?.first.id;
-                if (id == null) return;
-                ref.read(dBNotifierProvider.notifier).setSensorStatusActive(id);
-              },
-              icon: const Icon(Icons.add),
-            ),
+            // IconButton(
+            //   onPressed: () async {
+            //     String? id = ref.read(sensorsDataProvider).value?.first.id;
+            //     if (id == null) return;
+            //     ref.read(dBNotifierProvider.notifier).setSensorStatusActive(id);
+            //   },
+            //   icon: const Icon(Icons.add),
+            // ),
           ],
         ),
         body: const SensorDataList(),
