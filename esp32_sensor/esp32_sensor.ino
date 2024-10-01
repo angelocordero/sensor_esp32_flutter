@@ -1,88 +1,74 @@
-#include <MDNS.h>
+#include <ESPmDNS.h>
 #include <WiFiManager.h>
 #include <WiFiUdp.h>
 
+#define MQ2pin 33
+
 WiFiUDP udp;
 WiFiManager wifiManager;
-MDNS mdns(udp);
 
-const char *serviceName = "_FLUTTER";
-const int servicePort = 5555;
-const int udpPort = 5001;
-
-void reponse(const char *, MDNSServiceProtocol,
-             const char *name, IPAddress ip, unsigned short,
-             const char *);
-
-// for testing only
-// TODO: delete later
-void testMessage(const char* name, IPAddress ip);
+String mac2String(byte ar[]) {
+  String s;
+  for (byte i = 0; i < 6; ++i) {
+    char buf[3];
+    sprintf(buf, "%02X", ar[i]);
+    s += buf;
+    if (i < 5) s += ':';
+  }
+  return s;
+}
 
 void setup() {
-  Serial.begin(115200);
-  wifiManager.resetSettings();
+  Serial.begin(9600);
 
+  pinMode(MQ2pin, INPUT_PULLDOWN);
+
+  wifiManager.resetSettings();
   bool res = wifiManager.autoConnect();
 
   if (!res) {
-    // TODO: if failed to connect to wifi, give feedback to user
     Serial.println("Failed to connect");
+  }
 
-  } else {
-    // if  connected to wifi, initialize mDNS
-
-    Serial.println("Connected...");
-    IPAddress localIP = WiFi.localIP();
-
-    mdns.begin(WiFi.localIP(), "esp32");
-    Serial.println("mDNS started");
-
-    mdns.setServiceFoundCallback(reponse);
+  if (mdns_init() != ESP_OK) {
+    Serial.println("mDNS failed to start");
+    return;
   }
 }
 
 void loop() {
-  Serial.println(WiFi.getHostname());
-  // listen for app service
-    // Serial.println("Listening for services...");
-  // if (!mdns.isDiscoveringService()) {
-  // }
-    mdns.startDiscoveringService(serviceName,
-                                 MDNSServiceUDP,
-                                 servicePort);
-  mdns.run();
+  int numberOfServices = MDNS.queryService("_FLUTTER", "udp");
 
-  delay(100);
+  if (numberOfServices < 1) {
+    Serial.println("No service found...");
+  };
+
+  for (int i = 0; i < numberOfServices; i++) {
+    String hostname = MDNS.hostname(i);
+    IPAddress ip = MDNS.IP(i);
+
+    uint64_t mac = ESP.getEfuseMac();
+
+    String id = mac2String((byte*)&mac);
+
+    if (digitalRead(MQ2pin) == LOW) {
+      String msg = "{\"id\": \"" + id + "\",\"status\": \"active\"}";
+
+      udp.beginPacket(ip, 5001);
+      udp.print(msg);
+      udp.endPacket();
+    } else {
+      String msg = "{\"id\": \"" + id + "\",\"status\": \"connected\"}";
+
+      udp.beginPacket(ip, 5001);
+      udp.print(msg);
+      udp.endPacket();
+    }
+
+    Serial.print("Message sent to: [ Name: ");
+    Serial.print(hostname);
+    Serial.print(" , IP Address: ");
+    Serial.print(ip.toString());
+    Serial.println(" ]");
+  }
 }
-
-void reponse(const char *, MDNSServiceProtocol,
-             const char *name, IPAddress ip, unsigned short,
-             const char *) {
-   Serial.println(ip);
-
-  // check if IP address is not empty and if service name is correct
-   if(ip == IPAddress(0,0,0,0) && name != "FLUTTER" ) return;
-
- 
-  // get service IP address
-  // read sensor data and send data to app
-
-  testMessage(name, ip);
-}
-
-// TODO: delete later
-void testMessage(const char* name, IPAddress ip) {
-
-  String msg = "{\"id\": \"testsensor123\",\"status\": \"connected\"}";
-
-  udp.beginPacket(ip, udpPort);
-  udp.print(msg);
-  udp.endPacket();
-
-  Serial.print("Message sent to: [ Name: ");
-  Serial.print(name);
-  Serial.print(" , IP Address: ");
-  Serial.print(ip.toString());
-  Serial.println(" ]");
-}
-
